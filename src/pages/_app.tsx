@@ -5,6 +5,7 @@ import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
+import { Toaster } from "~/components/ui/sonner";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -13,13 +14,16 @@ export const fontSans = FontSans({
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <Component
-      {...pageProps}
-      className={cn(
-        "min-h-screen bg-background font-sans antialiased",
-        fontSans.variable,
-      )}
-    />
+    <>
+      <Component
+        {...pageProps}
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable,
+        )}
+      />
+      <Toaster />
+    </>
   );
 };
 
