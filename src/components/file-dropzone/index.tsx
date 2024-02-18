@@ -2,24 +2,32 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 
-export function FileDropzone() {
+type Props = {
+  onChange?: (files: File[]) => void;
+};
+
+export function FileDropzone({ onChange }: Props) {
   const [files, setFiles] = useState<File[]>([]);
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      acceptedFiles.forEach((file) => {
+        const reader = new FileReader();
 
-      reader.onabort = () => console.log("file reading was aborted");
-      reader.onerror = () => console.log("file reading has failed");
-      reader.onload = () => {
-        // Do whatever you want with the file contents
-        const binaryStr = reader.result;
-        console.log(binaryStr);
-      };
-      reader.readAsArrayBuffer(file);
+        reader.onabort = () => console.log("file reading was aborted");
+        reader.onerror = () => console.log("file reading has failed");
+        reader.onload = () => {
+          // Do whatever you want with the file contents
+          const binaryStr = reader.result;
+          console.log(binaryStr);
+        };
+        reader.readAsArrayBuffer(file);
 
-      setFiles((prevFiles) => [...prevFiles, file]);
-    });
-  }, []);
+        setFiles((prevFiles) => [...prevFiles, file]);
+        onChange?.([...files, file]);
+      });
+    },
+    [files, onChange],
+  );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: true,
