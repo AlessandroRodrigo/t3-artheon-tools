@@ -1,6 +1,6 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-import multer from "multer";
-import formidable, { Formidable } from "formidable";
+import type formidable from "formidable";
+import { Formidable } from "formidable";
 
 export const config = {
   api: {
