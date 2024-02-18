@@ -4,30 +4,9 @@ import { Formidable } from "formidable";
 
 export const config = {
   api: {
-    bodyParser: false, // Disallow body parsing, consume as stream
+    bodyParser: false,
   },
 };
-
-// async function parseFormData(
-//   req: NextApiRequest & { files?: unknown },
-//   res: NextApiResponse,
-// ) {
-//   const storage = multer.memoryStorage();
-//   const multerUpload = multer({ storage });
-//   const multerFiles = multerUpload.any();
-//   await new Promise((resolve, reject) => {
-//     multerFiles(req as any, res as any, (result: any) => {
-//       if (result instanceof Error) {
-//         return reject(result);
-//       }
-//       return resolve(result);
-//     });
-//   });
-//   return {
-//     fields: req.body,
-//     files: req.files,
-//   };
-// }
 
 export default async function handler(
   req: NextApiRequest,
