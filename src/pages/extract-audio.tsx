@@ -13,23 +13,27 @@ import axios from "axios";
 
 export default function ExtractAudioPage() {
   const [files, setFiles] = useState<File[]>([]);
+  const [convertedFiles, setConvertedFiles] = useState<Blob[]>([]);
 
   async function handleConvertToMP3() {
     if (files) {
+      setConvertedFiles([]);
+
       const formData = new FormData();
       for (const file of files) {
         formData.append("file", file);
       }
 
-      await axios
-        .post("/api/extract-audio", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((data) => {
-          console.log(data);
-        });
+      const response = await axios.post<Blob>("/api/extract-audio", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        responseType: "blob",
+      });
+
+      console.log(response.data);
+
+      setConvertedFiles((prev) => [...prev, response.data]);
     }
   }
 
@@ -62,6 +66,12 @@ export default function ExtractAudioPage() {
           </Button>
         </CardFooter>
       </Card>
+
+      {convertedFiles.map((file, index) => (
+        <audio key={index} controls>
+          <source src={URL.createObjectURL(file)} type="audio/mp3" />
+        </audio>
+      ))}
     </main>
   );
 }
