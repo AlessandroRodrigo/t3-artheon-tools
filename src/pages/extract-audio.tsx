@@ -58,6 +58,9 @@ export default function ExtractAudioPage() {
             onChange={(files: File[]) => {
               setFiles(files);
             }}
+            accept={{
+              "video/*": [".mp4"],
+            }}
           />
         </CardContent>
         <CardFooter>
