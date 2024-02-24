@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, type DropzoneProps } from "react-dropzone";
 import { toast } from "sonner";
 
 type Props = {
   onChange?: (files: File[]) => void;
+  accept: DropzoneProps["accept"];
 };
 
-export function FileDropzone({ onChange }: Props) {
+export function FileDropzone({ onChange, accept }: Props) {
   const [files, setFiles] = useState<File[]>([]);
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -36,9 +37,7 @@ export function FileDropzone({ onChange }: Props) {
         description: "You need to upload a .mp4 video file.",
       });
     },
-    accept: {
-      "video/mp4": [".mp4"],
-    },
+    accept,
   });
 
   return (
