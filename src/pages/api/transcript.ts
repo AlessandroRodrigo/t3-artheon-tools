@@ -76,8 +76,6 @@ export default async function handler(
       const result: TranscriptData[] = [];
 
       readLineInterface.on("line", (line) => {
-        console.log("reading line");
-
         const parsed = JSON.parse(line) as TranscriptData;
 
         result.push(parsed);
