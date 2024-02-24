@@ -3,6 +3,8 @@ import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
 import { remove } from "fs-extra";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createInterface } from "readline";
+import { eachOf, eachOfLimit } from "async";
+import { openai } from "~/server/lib/openai";
 
 type TranscriptData = {
   fileName: string;
@@ -46,26 +48,6 @@ export default async function handler(
       },
     );
 
-    for (const file of files.file) {
-      if (!file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
-      // const response = await openai.audio.transcriptions.create({
-      //   model: "whisper-1",
-      //   file: createReadStream(file.filepath),
-      //   temperature: 0,
-      //   response_format: "text",
-      // });
-
-      writeTxtStream.write(
-        JSON.stringify({
-          fileName: file.originalFilename,
-          transcript: "testing...",
-        }) + "\n",
-      );
-    }
-
     writeTxtStream.on("finish", () => {
       const readTxtStream = createReadStream(
         `${tmpFolderPath}/transcript.txt`,
@@ -104,13 +86,13 @@ export default async function handler(
           readJsonStream.destroy();
           res.end();
 
-          remove(tmpFolderPath)
-            .then(() => {
-              console.log("tmp folder removed");
-            })
-            .catch((err) => {
-              console.error(err);
-            });
+          // remove(tmpFolderPath)
+          //   .then(() => {
+          //     console.log("tmp folder removed");
+          //   })
+          //   .catch((err) => {
+          //     console.error(err);
+          //   });
         });
       });
 
@@ -121,7 +103,40 @@ export default async function handler(
       });
     });
 
-    writeTxtStream.end();
+    eachOfLimit(
+      files.file,
+      10,
+      (file, index, callback) => {
+        openai.audio.transcriptions
+          .create({
+            model: "whisper-1",
+            file: createReadStream(file.filepath),
+            temperature: 0,
+            response_format: "text",
+          })
+          .then((response) => {
+            writeTxtStream.write(
+              JSON.stringify({
+                fileName: file.originalFilename,
+                transcript: response,
+              }) + "\n",
+            );
+
+            callback();
+          })
+          .catch((err) => {
+            console.error(err);
+            callback(err as Error);
+          });
+      },
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
+
+        writeTxtStream.end();
+      },
+    );
   } else {
     return res.status(405).json({ message: "Method Not Allowed" });
   }
