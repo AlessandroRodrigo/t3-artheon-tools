@@ -1,9 +1,8 @@
+import { eachLimit } from "async";
 import { Formidable } from "formidable";
 import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
-import { remove } from "fs-extra";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createInterface } from "readline";
-import { eachLimit, eachOf, eachOfLimit } from "async";
 import { openai } from "~/server/lib/openai";
 
 type TranscriptData = {
