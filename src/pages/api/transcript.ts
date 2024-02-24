@@ -1,9 +1,12 @@
-import { eachLimit, queue } from "async";
+import { RetryOptions, eachLimit, queue, retry } from "async";
 import formidable, { Formidable } from "formidable";
 import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
+import { remove } from "fs-extra";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createInterface } from "readline";
+import { logger } from "~/server/lib/logger";
 import { openai } from "~/server/lib/openai";
+import { writeErrorLog } from "~/server/lib/write-error-log";
 
 type TranscriptData = {
   fileName: string;
@@ -18,6 +21,11 @@ export const config = {
 
 const tmpFolderPath = "./tmp";
 let pauseTxtStream = false;
+
+const retryOptions: RetryOptions<Error> = {
+  times: 3,
+  interval: (retryCount: number) => 500 * Math.pow(2, retryCount),
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -100,52 +108,68 @@ export default async function handler(
           readJsonStream.destroy();
           res.end();
 
-          // remove(tmpFolderPath)
-          //   .then(() => {
-          //     console.log("tmp folder removed");
-          //   })
-          //   .catch((err) => {
-          //     console.error(err);
-          //   });
+          remove(tmpFolderPath)
+            .then(() => {
+              console.log("tmp folder removed");
+            })
+            .catch((err) => {
+              console.error(err);
+            });
         });
       });
 
       readLineInterface.on("close", () => {
-        const canWrite = writeJsonStream.write(JSON.stringify(result), () => {
-          writeJsonStream.end();
-        });
+        const canContinue = writeJsonStream.write(
+          JSON.stringify(result),
+          () => {
+            writeJsonStream.end();
+          },
+        );
 
-        if (!canWrite) {
-          readTxtStream.pause();
+        if (!canContinue) {
           readLineInterface.pause();
         }
       });
     });
 
     const fileQueue = queue((file: formidable.File, callback) => {
-      openai.audio.transcriptions
-        .create({
-          model: "whisper-1",
-          file: createReadStream(file.filepath),
-          temperature: 0,
-          response_format: "text",
-        })
-        .then((response) => {
-          writeTxtStream.write(
-            JSON.stringify({
-              fileName: file.originalFilename,
-              transcript: response,
-            }) + "\n",
-          );
+      retry(
+        retryOptions,
+        (retryCallback) => {
+          openai.audio.transcriptions
+            .create({
+              model: "whisper-1",
+              file: createReadStream(file.filepath),
+              temperature: 0,
+              response_format: "text",
+            })
+            .then((response) => {
+              writeTxtStream.write(
+                JSON.stringify({
+                  fileName: file.originalFilename,
+                  transcript: response,
+                }) + "\n",
+              );
 
-          callback();
-        })
-        .catch((err) => {
-          console.error(err);
-          callback(err as Error);
-        });
+              logger.info(
+                `Transcripted ${file.originalFilename} with OpenAI's whisper-1 model`,
+              );
 
-      callback();
+              retryCallback();
+            })
+            .catch((err) => {
+              console.error(err);
+              retryCallback(err as Error);
+              writeErrorLog(
+                `Error transcribing ${file.originalFilename} with OpenAI's whisper-1 model: ${err}`,
+              );
+            });
+        },
+        callback,
+      );
+      logger.info(
+        `Transcripting ${file.originalFilename} with OpenAI's whisper-1 model`,
+      );
     }, 30);
 
     fileQueue.drain(() => {
