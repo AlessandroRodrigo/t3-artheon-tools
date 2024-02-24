@@ -3,7 +3,7 @@ import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
 import { remove } from "fs-extra";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createInterface } from "readline";
-import { eachOf, eachOfLimit } from "async";
+import { eachLimit, eachOf, eachOfLimit } from "async";
 import { openai } from "~/server/lib/openai";
 
 type TranscriptData = {
@@ -103,10 +103,10 @@ export default async function handler(
       });
     });
 
-    eachOfLimit(
+    eachLimit(
       files.file,
-      10,
-      (file, index, callback) => {
+      30,
+      (file, callback) => {
         openai.audio.transcriptions
           .create({
             model: "whisper-1",
