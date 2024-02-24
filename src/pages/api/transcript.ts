@@ -1,5 +1,5 @@
-import { eachLimit } from "async";
-import { Formidable } from "formidable";
+import { eachLimit, queue } from "async";
+import formidable, { Formidable } from "formidable";
 import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createInterface } from "readline";
@@ -17,6 +17,7 @@ export const config = {
 };
 
 const tmpFolderPath = "./tmp";
+let pauseTxtStream = false;
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,6 +48,10 @@ export default async function handler(
       },
     );
 
+    writeTxtStream.on("drain", () => {
+      pauseTxtStream = false;
+    });
+
     writeTxtStream.on("finish", () => {
       const readTxtStream = createReadStream(
         `${tmpFolderPath}/transcript.txt`,
@@ -58,9 +63,16 @@ export default async function handler(
         `${tmpFolderPath}/transcript.json`,
         { encoding: "utf8", flags: "w" },
       );
+
+      writeJsonStream.on("drain", () => {
+        readTxtStream.resume();
+        readLineInterface.resume();
+      });
+
       const readLineInterface = createInterface({
         input: readTxtStream,
       });
+
       const result: TranscriptData[] = [];
 
       readLineInterface.on("line", (line) => {
@@ -79,6 +91,11 @@ export default async function handler(
         res.writeHead(200);
         readJsonStream.pipe(res);
 
+        readJsonStream.on("error", (err) => {
+          console.error(err);
+          res.status(500).json({ message: "Internal Server Error" });
+        });
+
         readJsonStream.on("close", () => {
           readTxtStream.destroy();
           writeJsonStream.destroy();
@@ -96,46 +113,60 @@ export default async function handler(
       });
 
       readLineInterface.on("close", () => {
-        writeJsonStream.write(JSON.stringify(result), () => {
+        const canWrite = writeJsonStream.write(JSON.stringify(result), () => {
           writeJsonStream.end();
         });
+
+        if (!canWrite) {
+          readTxtStream.pause();
+          readLineInterface.pause();
+        }
       });
     });
 
-    eachLimit(
-      files.file,
-      30,
-      (file, callback) => {
-        openai.audio.transcriptions
-          .create({
-            model: "whisper-1",
-            file: createReadStream(file.filepath),
-            temperature: 0,
-            response_format: "text",
-          })
-          .then((response) => {
-            writeTxtStream.write(
-              JSON.stringify({
-                fileName: file.originalFilename,
-                transcript: response,
-              }) + "\n",
-            );
+    const fileQueue = queue((file: formidable.File, callback) => {
+      openai.audio.transcriptions
+        .create({
+          model: "whisper-1",
+          file: createReadStream(file.filepath),
+          temperature: 0,
+          response_format: "text",
+        })
+        .then((response) => {
+          writeTxtStream.write(
+            JSON.stringify({
+              fileName: file.originalFilename,
+              transcript: response,
+            }) + "\n",
+          );
 
-            callback();
-          })
-          .catch((err) => {
-            console.error(err);
-            callback(err as Error);
-          });
-      },
-      (err) => {
-        if (err) {
+          callback();
+        })
+        .catch((err) => {
           console.error(err);
-        }
+          callback(err as Error);
+        });
 
-        writeTxtStream.end();
-      },
-    );
+      callback();
+    }, 30);
+
+    fileQueue.drain(() => {
+      writeTxtStream.end();
+    });
+
+    files.file.forEach((file) => {
+      if (!pauseTxtStream) {
+        fileQueue.push(file).catch((err) => {
+          console.error(err);
+        });
+      } else {
+        writeTxtStream.once("drain", () => {
+          fileQueue.push(file).catch((err) => {
+            console.error(err);
+          });
+        });
+      }
+    });
   } else {
     return res.status(405).json({ message: "Method Not Allowed" });
   }
