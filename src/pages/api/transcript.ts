@@ -1,8 +1,12 @@
 import { Formidable } from "formidable";
-import { createReadStream } from "fs";
+import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { openai } from "~/server/lib/openai";
-import { OpenAIStream } from "ai";
+import { createInterface } from "readline";
+
+type TranscriptData = {
+  fileName: string;
+  transcript: string;
+};
 
 export const config = {
   api: {
@@ -10,31 +14,107 @@ export const config = {
   },
 };
 
+const tmpFolderPath = "./tmp";
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   if (req.method === "POST") {
     const form = new Formidable({
-      multiples: false,
+      multiples: true,
       allowEmptyFiles: false,
       keepExtensions: true,
+      maxTotalFileSize: 100 * 1024 * 1024 * 1024,
+      maxFileSize: 10 * 1024 * 1024 * 1024,
     });
 
     const [, files] = await form.parse(req);
 
-    if (!files.file?.[0]) {
+    if (!files.file)
       return res.status(400).json({ message: "No file uploaded" });
+
+    if (!existsSync("./tmp")) {
+      mkdirSync("./tmp");
     }
 
-    const response = await openai.audio.transcriptions.create({
-      model: "whisper-1",
-      file: createReadStream(files.file[0].filepath),
-      temperature: 0.2,
-      response_format: "text",
+    const writeTxtStream = createWriteStream(
+      `${tmpFolderPath}/transcript.txt`,
+      {
+        encoding: "utf8",
+      },
+    );
+
+    for (const file of files.file) {
+      if (!file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      writeTxtStream.write(
+        JSON.stringify({
+          fileName: file.originalFilename,
+          transcript: "testing...",
+        }) + "\n",
+      );
+    }
+
+    writeTxtStream.on("finish", () => {
+      const readTxtStream = createReadStream(
+        `${tmpFolderPath}/transcript.txt`,
+        {
+          encoding: "utf8",
+        },
+      );
+      const writeJsonStream = createWriteStream(
+        `${tmpFolderPath}/transcript.json`,
+        { encoding: "utf8", flags: "w" },
+      );
+      const readLineInterface = createInterface({
+        input: readTxtStream,
+      });
+      const result: TranscriptData[] = [];
+
+      readLineInterface.on("line", (line) => {
+        console.log("reading line");
+
+        const parsed = JSON.parse(line) as TranscriptData;
+
+        result.push(parsed);
+      });
+
+      writeJsonStream.on("finish", () => {
+        const readJsonStream = createReadStream(
+          `${tmpFolderPath}/transcript.json`,
+        );
+
+        res.writeHead(200);
+        readJsonStream.pipe(res);
+
+        readJsonStream.on("close", () => {
+          readTxtStream.close();
+          writeJsonStream.close();
+          readJsonStream.close();
+          res.end();
+        });
+      });
+
+      readLineInterface.on("close", () => {
+        writeJsonStream.write(JSON.stringify(result), () => {
+          writeJsonStream.end();
+        });
+      });
     });
 
-    res.status(200).json({ transcript: response });
+    writeTxtStream.end();
+
+    // const response = await openai.audio.transcriptions.create({
+    //   model: "whisper-1",
+    //   file: createReadStream(files.file[0].filepath),
+    //   temperature: 0,
+    //   response_format: "text",
+    //   prompt:
+    //     "Ignore any kind of metadata or tags, like subscribe by community",
+    // });
   } else {
     return res.status(405).json({ message: "Method Not Allowed" });
   }
