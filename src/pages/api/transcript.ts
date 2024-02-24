@@ -1,5 +1,6 @@
 import { Formidable } from "formidable";
 import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
+import { remove, removeSync } from "fs-extra";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createInterface } from "readline";
 
@@ -91,10 +92,18 @@ export default async function handler(
         readJsonStream.pipe(res);
 
         readJsonStream.on("close", () => {
-          readTxtStream.close();
-          writeJsonStream.close();
-          readJsonStream.close();
+          readTxtStream.destroy();
+          writeJsonStream.destroy();
+          readJsonStream.destroy();
           res.end();
+
+          remove(tmpFolderPath)
+            .then(() => {
+              console.log("tmp folder removed");
+            })
+            .catch((err) => {
+              console.error(err);
+            });
         });
       });
 
