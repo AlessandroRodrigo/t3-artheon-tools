@@ -1,5 +1,12 @@
+import { Accordion } from "@radix-ui/react-accordion";
+import axios from "axios";
 import { useState } from "react";
 import { FileDropzone } from "~/components/file-dropzone";
+import {
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -9,29 +16,39 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import axios from "axios";
+
+type TranscriptData = {
+  fileName: string;
+  transcript: string;
+};
 
 export default function TranscriptPage() {
   const [files, setFiles] = useState<File[]>([]);
-  const [transcript, setTranscript] = useState<string>("");
+  const [transcripting, setTranscripting] = useState(false);
+  const [transcriptData, setTranscriptData] = useState<TranscriptData[]>([]);
 
   async function handleTranscript() {
     if (files) {
-      setTranscript("");
+      setTranscriptData([]);
+      setTranscripting(true);
 
       const formData = new FormData();
       for (const file of files) {
         formData.append("file", file);
       }
 
-      const response = await axios.post<string>("/api/transcript", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axios.post<TranscriptData[]>(
+        "/api/transcript",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-        responseType: "json",
-      });
+      );
 
-      setTranscript(response.data);
+      setTranscriptData(response.data);
+      setTranscripting(false);
     }
   }
 
@@ -60,22 +77,58 @@ export default function TranscriptPage() {
           />
         </CardContent>
         <CardFooter>
-          <Button onClick={handleTranscript} disabled={files.length === 0}>
+          <Button
+            onClick={handleTranscript}
+            disabled={files.length === 0}
+            loading={transcripting}
+          >
             Transcribe
           </Button>
         </CardFooter>
       </Card>
 
-      {transcript && (
+      {transcriptData && (
         <Card>
-          <CardHeader>
-            <CardTitle>Transcript</CardTitle>
-            <CardDescription>
-              Here is the transcript of the audio file.
-            </CardDescription>
+          <CardHeader className="sticky top-0 flex flex-row items-center justify-between bg-card">
+            <div>
+              <CardTitle>Transcript</CardTitle>
+              <CardDescription>
+                Here is the transcript of the audio file.
+              </CardDescription>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setTranscriptData([])}
+                disabled={transcriptData.length === 0 || transcripting}
+              >
+                Clear
+              </Button>
+
+              <Button disabled={transcriptData.length === 0 || transcripting}>
+                <a
+                  href={`data:application/json,${encodeURIComponent(
+                    JSON.stringify(transcriptData, null, 2),
+                  )}`}
+                  download="transcript.json"
+                >
+                  Download Transcript
+                </a>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <p>{JSON.stringify(transcript, null, 2)}</p>
+            <Accordion type="multiple">
+              {transcriptData.map((data, index) => (
+                <AccordionItem value={index.toString()} key={index}>
+                  <AccordionTrigger>{data.fileName}</AccordionTrigger>
+                  <AccordionContent>
+                    <p>{data.transcript}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </CardContent>
         </Card>
       )}
