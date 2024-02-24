@@ -1,8 +1,9 @@
 import { Formidable } from "formidable";
 import { createReadStream, createWriteStream, existsSync, mkdirSync } from "fs";
-import { remove, removeSync } from "fs-extra";
+import { remove } from "fs-extra";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { createInterface } from "readline";
+import { openai } from "~/server/lib/openai";
 
 type TranscriptData = {
   fileName: string;
@@ -14,6 +15,9 @@ export const config = {
     bodyParser: false,
   },
 };
+
+let workers = 0;
+const maxWorkers = 5;
 
 const tmpFolderPath = "./tmp";
 
@@ -51,10 +55,24 @@ export default async function handler(
         return res.status(400).json({ message: "No file uploaded" });
       }
 
+      for (let i = 0; i < maxWorkers; i++) {
+        if (workers < maxWorkers) {
+          workers++;
+          break;
+        }
+      }
+
+      const response = await openai.audio.transcriptions.create({
+        model: "whisper-1",
+        file: createReadStream(file.filepath),
+        temperature: 0,
+        response_format: "text",
+      });
+
       writeTxtStream.write(
         JSON.stringify({
           fileName: file.originalFilename,
-          transcript: "testing...",
+          transcript: response,
         }) + "\n",
       );
     }
@@ -115,15 +133,6 @@ export default async function handler(
     });
 
     writeTxtStream.end();
-
-    // const response = await openai.audio.transcriptions.create({
-    //   model: "whisper-1",
-    //   file: createReadStream(files.file[0].filepath),
-    //   temperature: 0,
-    //   response_format: "text",
-    //   prompt:
-    //     "Ignore any kind of metadata or tags, like subscribe by community",
-    // });
   } else {
     return res.status(405).json({ message: "Method Not Allowed" });
   }
