@@ -17,6 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { InputWithLabel } from "~/components/ui/input-with-label";
 
 type TranscriptData = {
   fileName: string;
@@ -68,7 +70,7 @@ export default function TranscriptPage() {
           <CardTitle>Transcript Audio</CardTitle>
           <CardDescription>Select an audio file to transcribe.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4">
           <FileDropzone
             onChange={(files: File[]) => {
               setFiles(files);
@@ -76,6 +78,19 @@ export default function TranscriptPage() {
             accept={{
               "audio/*": [".mp3", ".wav", ".flac"],
             }}
+          />
+
+          <InputWithLabel
+            placeholder="en-US"
+            label="Language (optional)"
+            id="language"
+          />
+
+          <InputWithLabel
+            label="Prompt (optional)"
+            description="An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language."
+            placeholder="What is the meaning of life?"
+            id="promt"
           />
         </CardContent>
         <CardFooter>
