@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import axios from "axios";
+import { BackButton } from "~/components/ui/back-button";
 
 export default function ExtractAudioPage() {
   const [files, setFiles] = useState<File[]>([]);
@@ -40,6 +41,7 @@ export default function ExtractAudioPage() {
   return (
     <main className="flex flex-col gap-4 p-4">
       <header>
+        <BackButton />
         <h1 className="text-4xl font-bold">Extract Audio</h1>
         <p className="text-lg font-light text-slate-500">
           This is a page where you can extract audio from a video file.
