@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import { BackButton } from "~/components/ui/back-button";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -55,6 +56,7 @@ export default function TranscriptPage() {
   return (
     <main className="flex flex-col gap-4 p-4">
       <header>
+        <BackButton />
         <h1 className="text-4xl font-bold">Transcript Audio</h1>
         <p className="text-lg font-light text-slate-500">
           This is a page where you can transcribe audio from a file.
