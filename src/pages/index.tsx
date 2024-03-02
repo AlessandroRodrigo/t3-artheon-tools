@@ -71,7 +71,7 @@ function ToolCard({ description, title, url }: ToolCardProps) {
       <CardContent></CardContent>
 
       <CardFooter className="flex justify-end border-t p-4">
-        <Button>
+        <Button asChild>
           <Link href={url}>Open</Link>
         </Button>
       </CardFooter>
