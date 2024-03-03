@@ -1,6 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Accordion } from "@radix-ui/react-accordion";
 import axios from "axios";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { FileDropzone } from "~/components/file-dropzone";
 import {
   AccordionContent,
@@ -17,18 +20,43 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { InputWithLabel } from "~/components/ui/input-with-label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Textarea } from "~/components/ui/textarea";
 
 type TranscriptData = {
   fileName: string;
   transcript: string;
 };
 
+const FormSchema = z.object({
+  language: z.string().optional(),
+  responseFormat: z.string().optional(),
+  prompt: z.string().optional(),
+});
+
 export default function TranscriptPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [transcripting, setTranscripting] = useState(false);
   const [transcriptData, setTranscriptData] = useState<TranscriptData[]>([]);
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  });
 
   async function handleTranscript() {
     if (files) {
@@ -80,20 +108,71 @@ export default function TranscriptPage() {
             }}
           />
 
-          <div className="grid w-full grid-cols-2 gap-4">
-            <InputWithLabel
-              placeholder="en-US"
-              label="Language (optional)"
-              id="language"
-            />
+          <Form {...form}>
+            <form className="grid w-full grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="language"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Language (optional)</FormLabel>
+                    <FormDescription>
+                      The language of the audio file.
+                    </FormDescription>
+                    <Input onChange={field.onChange} placeholder="en-US" />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <InputWithLabel
-              label="Prompt (optional)"
-              description="An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language."
-              placeholder="What is the meaning of life?"
-              id="promt"
-            />
-          </div>
+              <FormField
+                control={form.control}
+                name="responseFormat"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Response format</FormLabel>
+                    <FormDescription>
+                      The format in which the response will be returned.
+                    </FormDescription>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a response format" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="json">json</SelectItem>
+                        <SelectItem value="srt">srt</SelectItem>
+                        <SelectItem value="txt">txt</SelectItem>
+                        <SelectItem value="verbose_json">
+                          verbose_json
+                        </SelectItem>
+                        <SelectItem value="vtt">vtt</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="prompt"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Prompt (optional)</FormLabel>
+                    <FormDescription>
+                      An optional text to guide the model&apos;s style or
+                      continue a previous audio segment. The prompt should match
+                      the audio language.
+                    </FormDescription>
+                    <Textarea onChange={field.onChange} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
         </CardContent>
         <CardFooter>
           <Button
