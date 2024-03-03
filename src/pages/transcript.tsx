@@ -174,7 +174,9 @@ export default function TranscriptPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex items-center justify-end gap-2">
+          <Button variant="outline">Clear</Button>
+
           <Button
             onClick={handleTranscript}
             disabled={files.length === 0}
