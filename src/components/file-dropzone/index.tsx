@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useDropzone, type DropzoneProps } from "react-dropzone";
 import { toast } from "sonner";
 
