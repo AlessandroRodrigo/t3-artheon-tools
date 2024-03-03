@@ -3,28 +3,28 @@ import { useDropzone, type DropzoneProps } from "react-dropzone";
 import { toast } from "sonner";
 
 type Props = {
+  files: File[];
   onChange?: (files: File[]) => void;
   accept: DropzoneProps["accept"];
 };
 
-export function FileDropzone({ onChange, accept }: Props) {
+export function FileDropzone({ onChange, accept, files }: Props) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      onChange?.(acceptedFiles);
+      onChange?.([...files, ...acceptedFiles]);
     },
-    [onChange],
+    [files, onChange],
   );
-  const { getRootProps, getInputProps, isDragActive, acceptedFiles } =
-    useDropzone({
-      onDrop,
-      multiple: true,
-      onDropRejected: () => {
-        toast.error("Invalid file type", {
-          description: "You need to upload a .mp4 video file.",
-        });
-      },
-      accept,
-    });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: true,
+    onDropRejected: () => {
+      toast.error("Invalid file type", {
+        description: "You need to upload a .mp4 video file.",
+      });
+    },
+    accept,
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,10 +41,9 @@ export function FileDropzone({ onChange, accept }: Props) {
       </div>
 
       <div>
-        {acceptedFiles.length} files loaded with a total size of{" "}
+        {files.length} files loaded with a total size of{" "}
         {Math.round(
-          acceptedFiles.reduce((acc, file) => acc + file.size, 0) /
-            (1024 * 1024),
+          files.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024),
         )}{" "}
         MB
       </div>
