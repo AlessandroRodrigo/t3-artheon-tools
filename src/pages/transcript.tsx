@@ -80,7 +80,14 @@ export default function TranscriptPage() {
 
       setTranscriptData(response.data);
       setTranscripting(false);
+
+      cleanUp();
     }
+  }
+
+  function cleanUp() {
+    setFiles([]);
+    form.reset();
   }
 
   return (
@@ -100,6 +107,7 @@ export default function TranscriptPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <FileDropzone
+            files={files}
             onChange={(files: File[]) => {
               setFiles(files);
             }}
@@ -175,7 +183,9 @@ export default function TranscriptPage() {
           </Form>
         </CardContent>
         <CardFooter className="flex items-center justify-end gap-2">
-          <Button variant="outline">Clear</Button>
+          <Button variant="outline" onClick={cleanUp}>
+            Clear
+          </Button>
 
           <Button
             onClick={handleTranscript}
