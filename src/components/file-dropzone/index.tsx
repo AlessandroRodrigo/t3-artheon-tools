@@ -1,3 +1,4 @@
+import { File } from "lucide-react";
 import { useCallback } from "react";
 import { useDropzone, type DropzoneProps } from "react-dropzone";
 import { toast } from "sonner";
@@ -30,9 +31,11 @@ export function FileDropzone({ onChange, accept, files }: Props) {
     <div className="flex flex-col gap-4">
       <div
         {...getRootProps()}
-        className="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-4 text-center transition-colors hover:border-gray-500"
+        className="flex cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-gray-300 p-4 text-center text-gray-500 transition-colors hover:border-gray-500"
       >
         <input {...getInputProps()} />
+        <File />
+
         {isDragActive ? (
           <p>Drop the files here ...</p>
         ) : (
