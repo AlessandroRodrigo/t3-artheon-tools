@@ -80,18 +80,20 @@ export default function TranscriptPage() {
             }}
           />
 
-          <InputWithLabel
-            placeholder="en-US"
-            label="Language (optional)"
-            id="language"
-          />
+          <div className="grid w-full grid-cols-2 gap-4">
+            <InputWithLabel
+              placeholder="en-US"
+              label="Language (optional)"
+              id="language"
+            />
 
-          <InputWithLabel
-            label="Prompt (optional)"
-            description="An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language."
-            placeholder="What is the meaning of life?"
-            id="promt"
-          />
+            <InputWithLabel
+              label="Prompt (optional)"
+              description="An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language."
+              placeholder="What is the meaning of life?"
+              id="promt"
+            />
+          </div>
         </CardContent>
         <CardFooter>
           <Button
