@@ -63,10 +63,14 @@ export default function TranscriptPage() {
       setTranscriptData([]);
       setTranscripting(true);
 
+      const formValues = form.getValues();
       const formData = new FormData();
       for (const file of files) {
         formData.append("file", file);
       }
+      formData.append("language", formValues.language ?? "");
+      formData.append("responseFormat", formValues.responseFormat ?? "");
+      formData.append("prompt", formValues.prompt ?? "");
 
       const response = await axios.post<TranscriptData[]>(
         "/api/transcript",
