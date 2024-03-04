@@ -28,6 +28,18 @@ const retryOptions: RetryOptions<Error> = {
   interval: (retryCount: number) => 500 * Math.pow(2, retryCount),
 };
 
+const responseFormatMapper: Record<
+  string,
+  "json" | "text" | "srt" | "verbose_json" | "vtt" | undefined
+> = {
+  text: "text",
+  json: "json",
+  srt: "srt",
+  verbose_json: "verbose_json",
+  vtt: "vtt",
+  default: undefined,
+} as const;
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -41,7 +53,12 @@ export default async function handler(
       maxFileSize: 10 * 1024 * 1024 * 1024,
     });
 
-    const [, files] = await form.parse(req);
+    const [fields, files] = await form.parse(req);
+
+    const language = fields.language?.[0];
+    const responseFormat =
+      responseFormatMapper[fields.responseFormat?.[0] ?? "default"];
+    const prompt = fields.prompt?.[0];
 
     if (!files.file)
       return res.status(400).json({ message: "No file uploaded" });
@@ -142,13 +159,15 @@ export default async function handler(
               model: "whisper-1",
               file: createReadStream(file.filepath),
               temperature: 0,
-              response_format: "text",
+              response_format: responseFormat,
+              prompt,
+              language,
             })
             .then((response) => {
               writeTxtStream.write(
                 JSON.stringify({
                   fileName: file.originalFilename,
-                  transcript: response,
+                  transcript: response?.text ?? response,
                 }) + "\n",
               );
 
