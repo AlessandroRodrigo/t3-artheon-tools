@@ -25,12 +25,16 @@ export default function ExtractAudioPage() {
         formData.append("file", file);
       }
 
-      const response = await axios.post<Blob>("/api/extract-audio", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axios.post<Blob>(
+        "/api/tools/extract-audio",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "blob",
         },
-        responseType: "blob",
-      });
+      );
 
       console.log(response.data);
 
