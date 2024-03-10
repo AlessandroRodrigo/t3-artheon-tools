@@ -73,7 +73,7 @@ export default function TranscriptPage() {
       formData.append("prompt", formValues.prompt ?? "");
 
       const response = await axios.post<TranscriptData[]>(
-        "/api/transcript",
+        "/api/tools/transcript",
         formData,
         {
           headers: {
