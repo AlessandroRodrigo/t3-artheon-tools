@@ -15,18 +15,18 @@ export default function Home() {
     {
       title: "Audio extractor",
       description: "Extract audio from video files",
-      url: "/extract-audio",
+      url: "/tools/extract-audio",
     },
     {
       title: "Transcriber",
       description: "Transcribe audio or video to text",
-      url: "/transcript",
+      url: "/tools/transcript",
     },
     {
       title: "Process knowledge",
       description:
         "Process your knowledge to make it more readable and easier to AI understand",
-      url: "/process-knowledge",
+      url: "/tools/process-knowledge",
     },
   ];
 
