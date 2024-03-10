@@ -6,15 +6,19 @@ import { toast } from "sonner";
 type Props = {
   files: File[];
   onChange?: (files: File[]) => void;
+  validate?: (file: File) => Promise<boolean>;
   accept: DropzoneProps["accept"];
 };
 
-export function FileDropzone({ onChange, accept, files }: Props) {
+export function FileDropzone({ onChange, accept, files, validate }: Props) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      onChange?.([...files, ...acceptedFiles]);
+      const validFiles = acceptedFiles.filter(
+        async (file) => !(await validate?.(file)),
+      );
+      onChange?.([...files, ...validFiles]);
     },
-    [files, onChange],
+    [files, onChange, validate],
   );
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
