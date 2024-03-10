@@ -22,6 +22,12 @@ export default function Home() {
       description: "Transcribe audio or video to text",
       url: "/transcript",
     },
+    {
+      title: "Process knowledge",
+      description:
+        "Process your knowledge to make it more readable and easier to AI understand",
+      url: "/process-knowledge",
+    },
   ];
 
   return (
