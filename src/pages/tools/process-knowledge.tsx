@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { FileDropzone } from "~/components/file-dropzone";
 import { BackButton } from "~/components/ui/back-button";
@@ -80,6 +81,15 @@ export default function ProcessKnowledgePage() {
           <FileDropzone
             accept={{
               "application/json": [".json"],
+            }}
+            validate={async (file) => {
+              try {
+                JSON.parse(await file.text());
+                return true;
+              } catch (error) {
+                toast.error(`The file ${file.name} is not a valid JSON file`);
+                return false;
+              }
             }}
             files={files}
             onChange={setFiles}
