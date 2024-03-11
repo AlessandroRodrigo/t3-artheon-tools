@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import { Toaster } from "~/components/ui/sonner";
+import { ThemeProvider } from "~/components/theme-provider";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -14,7 +15,12 @@ export const fontSans = FontSans({
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       <Component
         {...pageProps}
         className={cn(
@@ -23,7 +29,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         )}
       />
       <Toaster />
-    </>
+    </ThemeProvider>
   );
 };
 
