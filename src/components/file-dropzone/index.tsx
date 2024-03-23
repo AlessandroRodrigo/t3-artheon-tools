@@ -1,5 +1,5 @@
 import { Upload } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useDropzone, type DropzoneProps } from "react-dropzone";
 import { toast } from "sonner";
 
@@ -31,6 +31,19 @@ export function FileDropzone({ onChange, accept, files, validate }: Props) {
     accept,
   });
 
+  const acceptableFormats = useMemo(() => {
+    if (!accept) {
+      return "Any format";
+    }
+
+    const mapped = Object.keys(accept).map((format) => {
+      const formats = accept[format];
+      return `(${formats?.join(", ")})`;
+    });
+
+    return mapped.join(", ");
+  }, [accept]);
+
   return (
     <div className="flex flex-col gap-4">
       <div
@@ -48,7 +61,7 @@ export function FileDropzone({ onChange, accept, files, validate }: Props) {
               drop
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              .mp4 files only
+              {acceptableFormats}
             </p>
           </div>
           <input {...getInputProps()} />
