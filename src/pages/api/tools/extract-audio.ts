@@ -23,14 +23,24 @@ export default async function handler(
     });
 
     form.on("file", (name, file) => {
-      const fileStream = createReadStream(file.filepath);
+      try {
+        const fileStream = createReadStream(file.filepath);
 
-      const audioStream = extractAudioStream(fileStream);
+        const audioStream = extractAudioStream(fileStream);
 
-      res.writeHead(200, {
-        "Content-Type": "audio/mp3",
-      });
-      audioStream.pipe(res);
+        audioStream.on("error", (err) => {
+          console.error("Error extracting audio", err);
+          res.status(500).json({ message: "Error extracting audio" });
+        });
+
+        res.writeHead(200, {
+          "Content-Type": "audio/mp3",
+        });
+        audioStream.pipe(res);
+      } catch (e) {
+        console.error("Error extracting audio", e);
+        res.status(500).json({ message: "Error extracting audio" });
+      }
     });
 
     await form.parse(req);
