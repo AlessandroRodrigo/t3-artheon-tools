@@ -2,17 +2,21 @@ import ffmpeg from "fluent-ffmpeg";
 import { type ReadStream } from "fs";
 import { PassThrough, type Readable } from "stream";
 
-export const extractAudioStream = (fileStream: Readable) => {
+const AUDIO_CODEC = "libmp3lame";
+
+export const extractAudioStream = (fileStream: Readable, format = "mp3") => {
   const stream = new PassThrough();
 
   ffmpeg(fileStream)
-    .audioCodec("libmp3lame")
-    .toFormat("mp3")
+    .audioCodec(AUDIO_CODEC)
+    .toFormat(format)
     .on("error", (err) => {
       console.log(`Error processing audio: ${err}`);
+      stream.emit("error", err);
     })
     .on("end", () => {
       console.log(`Audio extracted`);
+      stream.end();
     })
     .pipe(stream);
 
