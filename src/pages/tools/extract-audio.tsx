@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/card";
 import axios from "axios";
 import { BackButton } from "~/components/ui/back-button";
+import { Constants } from "~/constants";
 
 export default function ExtractAudioPage() {
   const [files, setFiles] = useState<File[]>([]);
@@ -48,15 +49,15 @@ export default function ExtractAudioPage() {
         <BackButton />
         <h1 className="text-4xl font-bold">Extract Audio</h1>
         <p className="text-lg font-light text-slate-500">
-          This is a page where you can extract audio from a video file.
+          Here is where you can extract audio from video files in batch.
         </p>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle>Convert to MP3</CardTitle>
+          <CardTitle>Extract audio from video files</CardTitle>
           <CardDescription>
-            Select multiple MP4 files to convert to MP3.
+            Select multiple video files to extract audio.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,13 +65,13 @@ export default function ExtractAudioPage() {
             files={files}
             onChange={setFiles}
             accept={{
-              "video/*": [".mp4"],
+              "video/*": Constants.ACCEPTED_VIDEO_FORMATS,
             }}
           />
         </CardContent>
         <CardFooter>
           <Button onClick={handleConvertToMP3} disabled={files.length === 0}>
-            Convert to MP3
+            Extract audio
           </Button>
         </CardFooter>
       </Card>
