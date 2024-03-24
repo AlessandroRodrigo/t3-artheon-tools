@@ -36,7 +36,7 @@ const FormSchema = z.object({
 });
 
 function DownloadYoutubeAudioPage() {
-  const [resultFiles, setResultFiles] = useState<File[]>([]);
+  const [result, setResult] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -56,11 +56,26 @@ function DownloadYoutubeAudioPage() {
       },
     );
 
-    const file = new File([response.data], "audio.mp3", {
-      type: "audio/mp3",
+    console.log(response.data);
+
+    const file = new File([response.data], "result.zip", {
+      type: response.data.type,
     });
 
-    setResultFiles([file]);
+    setResult(file);
+  }
+
+  function handleDownloadResult() {
+    if (!result) return;
+
+    const url = URL.createObjectURL(result);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = result.name;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    a.remove();
   }
 
   return (
@@ -100,8 +115,18 @@ function DownloadYoutubeAudioPage() {
               />
             </form>
           </Form>
+
+          {result && (
+            <div className="mt-6 flex items-center justify-between rounded-md border p-4">
+              <span>
+                {result.name} - {Number(result.size / 1024 / 1024).toFixed(2)}MB
+              </span>
+
+              <Button onClick={handleDownloadResult}>Download</Button>
+            </div>
+          )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex items-center gap-2">
           <Button
             disabled={!form.formState.isValid}
             loading={form.formState.isSubmitting}
@@ -110,32 +135,6 @@ function DownloadYoutubeAudioPage() {
             Extract audio
           </Button>
         </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Download audio</CardTitle>
-          <CardDescription>
-            Download the extracted audio from the Youtube videos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="grid grid-cols-1 gap-4">
-            {resultFiles.map((file) => (
-              <li key={file.name}>
-                <audio
-                  controls
-                  src={URL.createObjectURL(file)}
-                  style={{ width: "100%" }}
-                />
-
-                <a href={URL.createObjectURL(file)} download={file.name}>
-                  {file.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
       </Card>
     </main>
   );
