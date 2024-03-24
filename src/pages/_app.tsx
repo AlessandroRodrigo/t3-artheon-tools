@@ -4,9 +4,11 @@ import { cn } from "~/lib/utils";
 
 import { api } from "~/utils/api";
 
-import "~/styles/globals.css";
-import { Toaster } from "~/components/ui/sonner";
 import { ThemeProvider } from "~/components/theme-provider";
+import { Toaster } from "~/components/ui/sonner";
+import "~/styles/globals.css";
+
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -15,21 +17,23 @@ export const fontSans = FontSans({
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <Component
-        {...pageProps}
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
-        )}
-      />
-      <Toaster />
-    </ThemeProvider>
+    <ClerkProvider {...pageProps}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <Component
+          {...pageProps}
+          className={cn(
+            "min-h-screen bg-background font-sans antialiased",
+            fontSans.variable,
+          )}
+        />
+        <Toaster />
+      </ThemeProvider>
+    </ClerkProvider>
   );
 };
 
