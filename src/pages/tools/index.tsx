@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import { withNavbar } from "~/components/navbar";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -10,7 +11,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
-export default function Home() {
+function Home() {
   const tools = [
     {
       title: "Audio extractor",
@@ -84,3 +85,5 @@ function ToolCard({ description, title, url }: ToolCardProps) {
     </Card>
   );
 }
+
+export default withNavbar(Home);
