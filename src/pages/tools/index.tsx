@@ -29,6 +29,11 @@ function Home() {
         "Process your knowledge to make it more readable and easier to AI understand",
       url: "/tools/process-knowledge",
     },
+    {
+      title: "Download Youtube Audio",
+      description: "Download audio from Youtube videos",
+      url: "/tools/download-youtube-audio",
+    },
   ];
 
   return (
