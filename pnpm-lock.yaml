@@ -47,6 +47,9 @@ dependencies:
   '@types/async':
     specifier: ^3.2.24
     version: 3.2.24
+  adm-zip:
+    specifier: ^0.5.12
+    version: 0.5.12
   ai:
     specifier: ^2.2.36
     version: 2.2.36(react@18.2.0)(solid-js@1.8.15)(svelte@4.2.12)(vue@3.4.19)
@@ -127,6 +130,9 @@ dependencies:
     version: 3.22.4
 
 devDependencies:
+  '@types/adm-zip':
+    specifier: ^0.5.5
+    version: 0.5.5
   '@types/better-sqlite3':
     specifier: ^7.6.6
     version: 7.6.9
@@ -1716,6 +1722,12 @@ packages:
     resolution: {integrity: sha512-KOzBEVaHW9IxEedUP9E50y0tYxAuvlzyjn80Bpemw4rcNbT4WtJnhkFPUY+qDJl7Crt3B/oY2qMgSxVWi9toLg==}
     dev: false
 
+  /@types/adm-zip@0.5.5:
+    resolution: {integrity: sha512-YCGstVMjc4LTY5uK9/obvxBya93axZOVOyf2GSUulADzmLhYE45u2nAssCs/fWBs1Ifq5Vat75JTPwd5XZoPJw==}
+    dependencies:
+      '@types/node': 18.19.17
+    dev: true
+
   /@types/async@3.2.24:
     resolution: {integrity: sha512-8iHVLHsCCOBKjCF2KwFe0p9Z3rfM9mL+sSP8btyR5vTjJRAqpBYD28/ZLgXPf0pjG1VxOvtCV/BgXkQbpSe8Hw==}
     dev: false
@@ -2120,6 +2132,11 @@ packages:
     resolution: {integrity: sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  /adm-zip@0.5.12:
+    resolution: {integrity: sha512-6TVU49mK6KZb4qG6xWaaM4C7sA/sgUMLy/JYMOzkcp3BvVLpW0fXDFQiIzAuxFCt/2+xD7fNIiPFAoLZPhVNLQ==}
+    engines: {node: '>=6.0'}
+    dev: false
 
   /agentkeepalive@4.5.0:
     resolution: {integrity: sha512-5GG/5IbQQpC9FpkRGsSvZI5QYeSCzlJHdpBQntCsuTOxhKD8lqKhrleg2Yi7yvMIf82Ycmmqln9U8V9qwEiJew==}
