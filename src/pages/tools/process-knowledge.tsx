@@ -24,11 +24,18 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 
 const FormSchema = z.object({
-  baseKnowledge: z.string(),
   prompt: z.string(),
+  responseFormat: z.string(),
 });
 
 function ProcessKnowledgePage() {
@@ -49,6 +56,7 @@ function ProcessKnowledgePage() {
     });
 
     formData.append("prompt", prompt);
+    formData.append("responseFormat", form.getValues("responseFormat"));
 
     const response = await axios.post<Array<Record<string, string>>>(
       "/api/tools/process-knowledge",
@@ -79,25 +87,28 @@ function ProcessKnowledgePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <FileDropzone
-            accept={{
-              "application/json": [".json"],
-            }}
-            validate={async (file) => {
-              try {
-                JSON.parse(await file.text());
-                return true;
-              } catch (error) {
-                toast.error(`The file ${file.name} is not a valid JSON file`);
-                return false;
-              }
-            }}
-            files={files}
-            onChange={setFiles}
-          />
-
           <Form {...form}>
             <form className="flex flex-col gap-4">
+              <FileDropzone
+                accept={{
+                  "application/json": [".json"],
+                  "text/plain": [".txt"],
+                }}
+                validate={async (file) => {
+                  try {
+                    JSON.parse(await file.text());
+                    return true;
+                  } catch (error) {
+                    toast.error(
+                      `The file ${file.name} is not a valid JSON file`,
+                    );
+                    return false;
+                  }
+                }}
+                files={files}
+                onChange={setFiles}
+              />
+
               <FormField
                 control={form.control}
                 name="prompt"
@@ -109,6 +120,34 @@ function ProcessKnowledgePage() {
                       knowledge
                     </FormDescription>
                     <Textarea onChange={field.onChange} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="responseFormat"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Response format</FormLabel>
+                    <FormDescription>
+                      Enter the response format for the AI to process the
+                      knowledge
+                    </FormDescription>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue
+                          onChange={field.onChange}
+                          placeholder="Select a response format"
+                        />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="json_object">JSON</SelectItem>
+                        <SelectItem value="text">Plain text</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
