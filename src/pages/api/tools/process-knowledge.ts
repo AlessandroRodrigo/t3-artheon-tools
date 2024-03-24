@@ -83,7 +83,7 @@ export default async function handler(
                   {
                     role: "system",
                     content:
-                      "You are a helpful assistant designed to output JSON.",
+                      "You are a helpful assistant designed to process knowledge.",
                   },
                   {
                     role: "user",
