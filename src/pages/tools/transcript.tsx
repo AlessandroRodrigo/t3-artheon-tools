@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FileDropzone } from "~/components/file-dropzone";
+import { withNavbar } from "~/components/navbar";
 import {
   AccordionContent,
   AccordionItem,
@@ -50,7 +51,7 @@ const FormSchema = z.object({
   prompt: z.string().optional(),
 });
 
-export default function TranscriptPage() {
+function TranscriptPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [transcripting, setTranscripting] = useState(false);
   const [transcriptData, setTranscriptData] = useState<TranscriptData[]>([]);
@@ -249,3 +250,5 @@ export default function TranscriptPage() {
     </main>
   );
 }
+
+export default withNavbar(TranscriptPage);
