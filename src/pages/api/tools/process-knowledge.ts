@@ -3,6 +3,7 @@ import type formidable from "formidable";
 import { Formidable } from "formidable";
 import { existsSync, mkdirSync, readFileSync } from "fs";
 import { type NextApiRequest, type NextApiResponse } from "next";
+import { type ChatCompletionCreateParams } from "openai/resources/index.mjs";
 import { logger } from "~/server/lib/logger";
 import { openai } from "~/server/lib/openai";
 import { writeErrorLog } from "~/server/lib/write-error-log";
@@ -11,6 +12,14 @@ export const config = {
   api: {
     bodyParser: false,
   },
+};
+
+const responseFormatMap: Record<
+  string,
+  ChatCompletionCreateParams.ResponseFormat["type"]
+> = {
+  json_object: "json_object",
+  text: "text",
 };
 
 const retryOptions: RetryOptions<Error> = {
@@ -34,6 +43,13 @@ export default async function handler(
     const [fields, files] = await form.parse(req);
 
     const prompt = fields.prompt?.[0];
+    const responseFormat = fields.responseFormat?.[0];
+
+    if (!responseFormat || !responseFormatMap[responseFormat]) {
+      return res.status(400).json({
+        message: "Invalid response format",
+      });
+    }
 
     if (!prompt) return res.status(400).json({ message: "No prompt provided" });
 
@@ -60,7 +76,9 @@ export default async function handler(
               .create({
                 model: "gpt-3.5-turbo",
                 temperature: 0.3,
-                response_format: { type: "json_object" },
+                response_format: {
+                  type: responseFormatMap[responseFormat] ?? "text",
+                },
                 messages: [
                   {
                     role: "system",
