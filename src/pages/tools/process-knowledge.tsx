@@ -92,7 +92,6 @@ function ProcessKnowledgePage() {
               <FileDropzone
                 accept={{
                   "application/json": [".json"],
-                  "text/plain": [".txt"],
                 }}
                 validate={async (file) => {
                   try {
