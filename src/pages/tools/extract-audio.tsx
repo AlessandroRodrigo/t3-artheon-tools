@@ -12,8 +12,9 @@ import {
 import axios from "axios";
 import { BackButton } from "~/components/ui/back-button";
 import { Constants } from "~/constants";
+import { withNavbar } from "~/components/navbar";
 
-export default function ExtractAudioPage() {
+function ExtractAudioPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [convertedFiles, setConvertedFiles] = useState<Blob[]>([]);
 
@@ -84,3 +85,5 @@ export default function ExtractAudioPage() {
     </main>
   );
 }
+
+export default withNavbar(ExtractAudioPage);
