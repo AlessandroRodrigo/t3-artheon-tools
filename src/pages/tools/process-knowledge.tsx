@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { FileDropzone } from "~/components/file-dropzone";
+import { withNavbar } from "~/components/navbar";
 import { BackButton } from "~/components/ui/back-button";
 import { Button } from "~/components/ui/button";
 import {
@@ -30,7 +31,7 @@ const FormSchema = z.object({
   prompt: z.string(),
 });
 
-export default function ProcessKnowledgePage() {
+function ProcessKnowledgePage() {
   const [files, setFiles] = useState<File[]>([]);
   const [output, setOutput] = useState<Record<string, string>[]>([]);
 
@@ -151,3 +152,5 @@ export default function ProcessKnowledgePage() {
     </main>
   );
 }
+
+export default withNavbar(ProcessKnowledgePage);
