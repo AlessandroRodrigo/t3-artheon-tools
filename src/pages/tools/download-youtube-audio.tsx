@@ -1,11 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@radix-ui/react-select";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
