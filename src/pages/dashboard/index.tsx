@@ -200,7 +200,7 @@ export default function Dashboard() {
             </form>
           </div>
           <div>
-            <UserButton />
+            <UserButton afterSignOutUrl="/" />
             <span className="sr-only">Toggle user menu</span>
           </div>
         </header>
