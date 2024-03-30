@@ -10,7 +10,26 @@ import { index, int, sqliteTableCreator, text } from "drizzle-orm/sqlite-core";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = sqliteTableCreator((name) => `t3-artheon-tools_${name}`);
+export const createTable = sqliteTableCreator(
+  (name) => `t3-artheon-tools_${name}`,
+);
+
+export const users = createTable(
+  "user",
+  {
+    id: text("id", { length: 36 })
+      .primaryKey()
+      .default(sql`uuid_generate_v4()`),
+    clerkId: text("clerk_id"),
+    createdAt: int("created_at", { mode: "timestamp" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: int("updatedAt", { mode: "timestamp" }),
+  },
+  (example) => ({
+    nameIndex: index("clerk_id_idx").on(example.clerkId),
+  }),
+);
 
 export const posts = createTable(
   "post",
@@ -24,5 +43,5 @@ export const posts = createTable(
   },
   (example) => ({
     nameIndex: index("name_idx").on(example.name),
-  })
+  }),
 );
