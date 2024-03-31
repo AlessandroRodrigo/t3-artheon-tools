@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -64,6 +64,23 @@ function ProcessKnowledgePage() {
     );
 
     setOutput(response.data);
+    toast.success("The knowledge has been processed", {
+      dismissible: false,
+      action: {
+        label: "Download",
+        onClick: () => {
+          const blob = new Blob([JSON.stringify(output, null, 2)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "processed-knowledge.json";
+          a.click();
+          URL.revokeObjectURL(url);
+        },
+      },
+    });
   }
 
   return (
@@ -134,12 +151,12 @@ function ProcessKnowledgePage() {
                       Enter the response format for the AI to process the
                       knowledge
                     </FormDescription>
-                    <Select>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <SelectTrigger>
-                        <SelectValue
-                          onChange={field.onChange}
-                          placeholder="Select a response format"
-                        />
+                        <SelectValue placeholder="Select a response format" />
                       </SelectTrigger>
 
                       <SelectContent>
@@ -158,39 +175,11 @@ function ProcessKnowledgePage() {
           <Button
             onClick={handleSubmit}
             disabled={files.length === 0 || !form.formState.isValid}
+            loading={form.formState.isSubmitting}
           >
             Process
           </Button>
         </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Processed knowledge</CardTitle>
-            <CardDescription>
-              The processed knowledge is ready to be downloaded. You can use the
-              processed knowledge to train AI models or to make it more readable
-              for humans.
-            </CardDescription>
-          </div>
-
-          <Button disabled={!!output}>
-            <a
-              href={`data:application/json;charset=utf-8,${encodeURIComponent(
-                JSON.stringify(output, null, 2),
-              )}`}
-              download="processed-knowledge.json"
-            >
-              Download
-            </a>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <pre className="overflow-auto whitespace-pre-wrap break-words">
-            {JSON.stringify(output, null, 2)}
-          </pre>
-        </CardContent>
       </Card>
     </main>
   );
