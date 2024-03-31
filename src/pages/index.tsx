@@ -7,14 +7,62 @@ import {
   LucideArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import { BackgroundBeams } from "~/components/ui/background-beams";
+import { BackgroundGradientAnimation } from "~/components/ui/background-gradient-animation";
 import { Button } from "~/components/ui/button";
+import { Spotlight } from "~/components/ui/spotlight";
 
 export default function LandingPage() {
   return (
     <>
-      <HeroSection />
-      <FeaturesSection />
-      <PriceSection />
+      <div className="dark:bg-grid-white/[0.2] bg-grid-black/[0.2] relative flex  min-h-screen w-full items-center justify-start bg-white dark:bg-black">
+        <Spotlight
+          className="-top-40 left-0 md:-top-20 md:left-60"
+          fill="white"
+        />
+        {/* Radial gradient for the container to give a faded look */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
+        <div className="flex flex-col items-start justify-start">
+          <p className="relative z-20 bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text py-8 text-4xl font-bold text-transparent sm:text-7xl">
+            Artheon Automation
+          </p>
+          <div className="relative z-20 flex flex-col items-start justify-start gap-2">
+            <p className="text-center text-lg text-neutral-400 dark:text-neutral-500">
+              Automate your business with our powerful tools
+            </p>
+            <div className="flex gap-4">
+              <Link href="/tools" passHref>
+                <Button>Get Started</Button>
+              </Link>
+              <Link href="/about" passHref>
+                <Button variant="secondary">Learn More</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative mx-auto flex h-[40rem] w-[80%] flex-col items-center justify-center rounded-md bg-neutral-950 antialiased">
+        <div className="mx-auto max-w-2xl p-4">
+          <h1 className="relative z-10 bg-gradient-to-b from-neutral-200  to-neutral-600 bg-clip-text text-center font-sans text-lg  font-bold text-transparent md:text-7xl">
+            Join the waitlist
+          </h1>
+          <p></p>
+          <p className="relative z-10 mx-auto my-2 max-w-lg text-center text-sm text-neutral-500">
+            Welcome to MailJet, the best transactional email service on the web.
+            We provide reliable, scalable, and customizable email solutions for
+            your business. Whether you&apos;re sending order confirmations,
+            password reset emails, or promotional campaigns, MailJet has got you
+            covered.
+          </p>
+          <input
+            type="text"
+            placeholder="hi@manuarora.in"
+            className="relative z-10 mt-4 w-full rounded-lg  border border-neutral-800 bg-neutral-950 placeholder:text-neutral-700  focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
+        <BackgroundBeams />
+      </div>
     </>
   );
 }
