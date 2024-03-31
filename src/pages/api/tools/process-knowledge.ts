@@ -111,7 +111,7 @@ export default async function handler(
                 retryCallback();
               })
               .catch((error) => {
-                logger.info(`Error processing section`, JSON.stringify(error));
+                logger.error(`Error processing section`, error);
                 writeErrorLog(String(error));
                 return retryCallback(error as Error);
               });
