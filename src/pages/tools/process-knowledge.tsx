@@ -155,7 +155,12 @@ function ProcessKnowledgePage() {
           </Form>
         </CardContent>
         <CardFooter className="flex items-center justify-end gap-2">
-          <Button onClick={handleSubmit}>Process</Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={files.length === 0 || !form.formState.isValid}
+          >
+            Process
+          </Button>
         </CardFooter>
       </Card>
 
