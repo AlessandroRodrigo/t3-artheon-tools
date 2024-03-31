@@ -170,7 +170,7 @@ function ProcessKnowledgePage() {
             </CardDescription>
           </div>
 
-          <Button asChild>
+          <Button disabled={!!output}>
             <a
               href={`data:application/json;charset=utf-8,${encodeURIComponent(
                 JSON.stringify(output, null, 2),
