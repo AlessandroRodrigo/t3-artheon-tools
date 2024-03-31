@@ -13,15 +13,13 @@ import axios from "axios";
 import { BackButton } from "~/components/ui/back-button";
 import { Constants } from "~/constants";
 import { withNavbar } from "~/components/navbar";
+import { toast } from "sonner";
 
 function ExtractAudioPage() {
   const [files, setFiles] = useState<File[]>([]);
-  const [convertedFiles, setConvertedFiles] = useState<Blob[]>([]);
 
   async function handleConvertToMP3() {
     if (files) {
-      setConvertedFiles([]);
-
       const formData = new FormData();
       for (const file of files) {
         formData.append("file", file);
@@ -38,9 +36,21 @@ function ExtractAudioPage() {
         },
       );
 
-      console.log(response.data);
-
-      setConvertedFiles((prev) => [...prev, response.data]);
+      toast.success("Audio extracted successfully!", {
+        dismissible: false,
+        action: {
+          label: "Download",
+          onClick: () => {
+            const url = window.URL.createObjectURL(response.data);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "audio.zip";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+          },
+        },
+      });
     }
   }
 
@@ -76,12 +86,6 @@ function ExtractAudioPage() {
           </Button>
         </CardFooter>
       </Card>
-
-      {convertedFiles.map((file, index) => (
-        <audio key={index} controls>
-          <source src={URL.createObjectURL(file)} type="audio/mp3" />
-        </audio>
-      ))}
     </main>
   );
 }
